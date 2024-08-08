@@ -13,10 +13,11 @@ const useDietForm = ({ initialValue }: DietFormProps) => {
   const [activeChipIdx, setActiveChipIdx] = useState<number>(0);
   const [foodForm, setFoodForms] = useState<FoodType>(foodChips[0]);
 
-  const handleChange = (field: keyof FoodType, value: string | number) => {
+  const handleChange = (field: keyof FoodType, value: string | number | null) => {
+    const updatedValue = field === 'foodName' || field === 'foodType' ? value : value === '' ? null : Number(value);
     const updatedFoods = foodChips.map((food, idx) => (idx === activeChipIdx ? { ...food, [field]: value } : food));
     setFoodChips(updatedFoods);
-    setFoodForms({ ...foodForm, [field]: value });
+    setFoodForms({ ...foodForm, [field]: updatedValue });
   };
 
   const addNewChip = () => {
@@ -31,11 +32,12 @@ const useDietForm = ({ initialValue }: DietFormProps) => {
     if (foodChips.length === 1) {
       setFoodChips([initialFoodState]);
       setFoodForms(foodChips[0]);
+    } else {
+      const deletedFoods = foodChips.filter((food) => food.id !== deleteFoodId);
+      setFoodChips(deletedFoods);
+      setActiveChipIdx(0);
+      setFoodForms(deletedFoods[0]);
     }
-    const deletedFoods = foodChips.filter((food) => food.id !== deleteFoodId);
-    setFoodChips(deletedFoods);
-    setActiveChipIdx(0);
-    setFoodForms(deletedFoods[0]);
   };
 
   const changeChip = (chipIdx: number) => {
@@ -54,6 +56,9 @@ const useDietForm = ({ initialValue }: DietFormProps) => {
   const validateFood = (food: FoodType = foodChips[activeChipIdx]) => {
     const { foodName, kcal, carbohydrate, protein, fat } = food;
     if (!foodName) return alert('음식 이름을 입력해주세요');
+    if (kcal === null || carbohydrate === null || protein === null || fat === null) {
+      return true;
+    }
     if (kcal < carbohydrate * 4 + protein * 4 + fat * 9) return alert('영양 성분을 올바르게 입력해주세요');
     return true;
   };
