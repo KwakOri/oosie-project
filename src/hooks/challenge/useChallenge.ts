@@ -1,3 +1,4 @@
+import { ChallengeFilterTypes } from '@/types/challenge';
 import { Database } from '@/types/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -29,3 +30,6 @@ export const useChallengeVerificationDelete = () => useMutation(mutationOptions.
 export const useGetChallengeDetail = (id: number) => useQuery(queryOptions.getChallengeDetail(id));
 
 export const useGetPopularChallenges = () => useQuery(queryOptions.popular());
+
+export const useGetChallengeCount = ({ filter }: { filter: ChallengeFilterTypes }) =>
+  useQuery(queryOptions.count({ filter }));

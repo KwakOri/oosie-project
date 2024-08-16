@@ -1,16 +1,18 @@
 import { getVerification } from '@/app/(providers)/(root)/challenges/[id]/verification/_hooks/useVerification';
 import api from '@/service/service';
+import { ChallengeFilterTypes } from '@/types/challenge';
 import { Database, Tables } from '@/types/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export const challengesQueryKeys = {
   all: ['challenge'] as const,
   popular: () => [...challengesQueryKeys.all, 'coming'] as const,
+  count: ({ filter }: { filter: ChallengeFilterTypes }) => [...challengesQueryKeys.all, 'filter', filter],
 };
 
 export const queryOptions = {
   getChallengeDetail: (id: number) => ({
-    queryKey: challengesQueryKeys.all,
+    queryKey: ['challenge', { cid: id }],
     queryFn: async () => {
       const data = await api.challenge.getChallengeDetail(id);
 
@@ -28,6 +30,10 @@ export const queryOptions = {
   popular: () => ({
     queryKey: challengesQueryKeys.popular(),
     queryFn: () => fetch(`/api/challenges/coming?category=all`).then((res) => res.json()),
+  }),
+  count: ({ filter }: { filter: ChallengeFilterTypes }) => ({
+    queryKey: challengesQueryKeys.count({ filter }),
+    queryFn: () => api.challenge.getChallengeCount({ filter }),
   }),
 };
 

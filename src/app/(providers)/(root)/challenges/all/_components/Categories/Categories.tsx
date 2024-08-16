@@ -1,23 +1,25 @@
 'use client';
 
-import { useChallengeCategoryStore } from '@/stores/stores';
-
-import { CATEGORIES } from '../../_constants/constants';
+import { CATEGORY_LIST } from '@/constants/challenges';
+import { useChallengeFilterStore } from '@/stores/challengeFilter.store';
+import { CategoryTypes } from '../../_constants/constants';
 import CategoryButton from '../CategoryButton';
 
 const Categories = () => {
-  const category = useChallengeCategoryStore((state) => state.category);
-  const setCategory = useChallengeCategoryStore((state) => state.setCategory);
+  const filter = useChallengeFilterStore((state) => state.filter);
+  const setFilter = useChallengeFilterStore((state) => state.setFilter);
 
-  const handleClickButton = (value: string) => {
-    setCategory(value);
+  const handleClickButton = (value: CategoryTypes) => {
+    const newFilter = structuredClone(filter);
+    newFilter.categories = [value];
+    setFilter(newFilter);
   };
 
   return (
     <ul className="flex gap-2">
-      {CATEGORIES.map((button, i) => (
-        <li key={i}>
-          <CategoryButton {...button} category={category} onClick={handleClickButton} />
+      {CATEGORY_LIST.map((button, i) => (
+        <li key={button.value}>
+          <CategoryButton {...button} category={filter.categories?.[0]} onClick={handleClickButton} />
         </li>
       ))}
     </ul>
