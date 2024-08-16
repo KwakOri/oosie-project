@@ -22,3 +22,5 @@ export type FoodType = {
 };
 
 export type DietsLogType = DietTableType[];
+
+export type FoodTableType = Tables<'foods'>;

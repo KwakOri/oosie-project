@@ -1,9 +1,11 @@
 'use client';
+import CheckSVG from '@/assets/modal/check.svg';
 import Button from '@/components/Button';
 import CheckButton from '@/components/ButtonIcon/CheckButton';
 import PrevButton from '@/components/ButtonIcon/PrevButton';
 import InputText from '@/components/Input/InputText/InputText';
 import TitleHeader from '@/components/PrevButtonAndTitleHeader/PrevButtonAndTitleHeader';
+import { useModal } from '@/contexts/modal.context/modal.context';
 import { useGetUser } from '@/hooks/auth/useUsers';
 import Mobile from '@/layouts/Mobile';
 import api from '@/service/service';
@@ -16,7 +18,10 @@ import useInputs from '../_hooks/useInputs';
 import { TInputs } from '../_types/types';
 
 const MyProfileEditPage = () => {
+  const modal = useModal();
   const router = useRouter();
+  const [isNicknameValid, setIsNicknameValid] = useState<boolean>(true);
+
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const imgRef = useRef<HTMLInputElement | null>(null);
@@ -28,30 +33,42 @@ const MyProfileEditPage = () => {
     weight: 0,
   });
   const { data, isPending } = useGetUser();
+  console.log(data?.nickname);
+  console.log(inputs.nickname);
   const queryClient = useQueryClient();
 
   const { mutate: updateProfile } = useMutation({
     mutationFn: async ({ formData }: { formData: FormData }) => api.users.updateUserProfile({ formData }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.status !== 200) return;
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      alert('수정이 완료되었습니다');
+      await modal.alert(['수정이 완료되었습니다']);
       router.replace('/mypage');
     },
   });
 
   const { mutate: deleteProfile } = useMutation({
     mutationFn: async () => api.users.deleteUserAvatar(),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.status !== 200) return;
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      alert('삭제가 완료되었습니다.');
+      await modal.alert(['삭제가 완료되었습니다.']);
     },
   });
 
+  const validateNickname = async () => {
+    if (!inputs.nickname) return modal.alert(['닉네임을 입력해주세요']);
+    const { isAvailable } = await api.users.validateNickname({ nickname: inputs.nickname });
+    if (!isAvailable) return await modal.alert(['이미 사용중인 닉네임입니다']);
+    await modal.alert(['사용가능한 닉네임입니다']);
+    return setIsNicknameValid(true);
+  };
+
   const handleUpdateProfile = async () => {
-    const yes = confirm('수정사항을 저장하시겠습니까?');
+    const yes = await modal.confirm(['수정사항을 저장하시겠습니까?']);
     if (!yes) return;
+
+    if (!isNicknameValid) return modal.alert(['닉네임 중복여부를 확인해주세요']);
 
     const formData = new FormData();
     if (inputs.nickname) formData.append('nickname', inputs.nickname);
@@ -79,7 +96,7 @@ const MyProfileEditPage = () => {
   };
 
   const handleDeleteAvatar = async () => {
-    const yes = confirm('정말로 프로필 이미지를 삭제하시겠습니까?');
+    const yes = await modal.confirm(['정말로 프로필 이미지를 삭제하시겠습니까?']);
     if (!yes) return;
 
     deleteProfile();
@@ -97,6 +114,14 @@ const MyProfileEditPage = () => {
       });
     }
   }, [isPending, data]);
+
+  useEffect(() => {
+    if (data?.nickname === inputs.nickname) {
+      setIsNicknameValid(true);
+    } else {
+      setIsNicknameValid(false);
+    }
+  }, [inputs.nickname]);
 
   if (isPending || !data) return <div>Loading...</div>;
 
@@ -129,7 +154,7 @@ const MyProfileEditPage = () => {
             name="avatar"
             hidden
           />
-          <button className="text-sm text-primary-100 border-b border-primary-100 mt-2" onClick={handleDeleteAvatar}>
+          <button className="text-[12px] text-gray-300 border-b border-gray-300 mt-2" onClick={handleDeleteAvatar}>
             프로필 삭제
           </button>
         </div>
@@ -139,18 +164,32 @@ const MyProfileEditPage = () => {
               className="w-full"
               label={'닉네임'}
               id={'nickname'}
-              onChange={onChange}
+              onChange={(e) => {
+                onChange(e);
+              }}
               value={inputs.nickname}
               type={'text'}
               name={'nickname'}
             />
 
             <div className="w-[64px] flex items-end">
-              <Button className="w-[64px] text-sm">
-                <p className="w-full">확인</p>
-              </Button>
+              {isNicknameValid ? (
+                <button className="w-full h-[50px] flex py-[13px] justify-center items-center " disabled>
+                  <CheckSVG />
+                </button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    validateNickname();
+                  }}
+                  className="w-[64px] text-sm"
+                >
+                  <p className="w-full">확인</p>
+                </Button>
+              )}
             </div>
           </div>
+
           <div className="flex">
             <InputText
               name={'email'}
