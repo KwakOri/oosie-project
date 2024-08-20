@@ -51,6 +51,32 @@ class ChallengeAPI {
     }
   };
 
+  joinChallenge = async (cid: number) => {
+    try {
+      const response = await axios.post(`${this.baseURL}/join?cid=${cid}`);
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.error || error.message);
+      }
+      throw error;
+    }
+  };
+
+  leaveChallenge = async (cid: number) => {
+    try {
+      const response = await axios.delete(`${this.baseURL}/join?cid=${cid}`);
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.error || error.message);
+      }
+      throw error;
+    }
+  };
+
   registerVerification = async (verifyData: Omit<Tables<'challengeVerify'>, 'id' | 'date'>) => {
     try {
       const response = await axios.post(`${this.baseURL}/verification`, verifyData);
@@ -120,7 +146,7 @@ class ChallengeAPI {
       const response = await axios.get(
         `${this.baseURL}/all?categories=${filter.categories.join(',')}&status=${filter.status.join(
           ',',
-        )}&order=${filter.order.join(',')}&page=${page}&limit=${limit}`,
+        )}&order=${filter.order.join(',')}&searchValue=${filter.searchValue}&page=${page}&limit=${limit}`,
       );
 
       const data = await response.data;
@@ -157,7 +183,7 @@ class ChallengeAPI {
       const response = await axios.get(
         `${this.baseURL}/all/count?categories=${filter.categories.join(',')}&status=${filter.status.join(
           ',',
-        )}&order=${filter.order.join(',')}`,
+        )}&order=${filter.order.join(',')}&searchValue=${filter.searchValue}`,
       );
       return response.data;
     } catch (error) {
@@ -173,6 +199,15 @@ class ChallengeAPI {
       : await axios.post(`${this.baseURL}/verification/likes?verificationId=${verificationId}`);
     const data = response.data;
     return data;
+  };
+
+  getPaginatedMyChallenges = async ({ page, limit }: { page: number; limit: number }) => {
+    const response = await axios.get(`${this.baseURL}/me?page=${page}&limit=${limit}`);
+    return response.data;
+  };
+  getPaginatedOwnerChallenges = async ({ page, limit }: { page: number; limit: number }) => {
+    const response = await axios.get(`${this.baseURL}/owner?page=${page}&limit=${limit}`);
+    return response.data;
   };
 }
 

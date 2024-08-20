@@ -9,7 +9,9 @@ import React from 'react';
 const JoinedChallengesLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <h5 className="text-white/50 text-sm">챌린지</h5>
+      <Link href={'/challenges'}>
+        <h5 className="text-white/50 text-sm hover:shadow-md hover:font-bold">챌린지</h5>
+      </Link>
       {children}
     </>
   );
@@ -53,9 +55,9 @@ const JoinedChallenges = () => {
 
   return (
     <JoinedChallengesLayout>
-      <ul className="w-full text-sm text-white grid gap-y-4">
-        {joinedChallenges.data.slice(0, 3).map(({ id, challenges, challengeId }) => {
-          if (challenges?.isProgress === 'RUN') {
+      <ul className="w-full text-sm text-white grid grid-cols-1 sm:grid-cols-2 gap-y-5">
+        {joinedChallenges.data.slice(0, 6).map(({ id, challenges, challengeId }) => {
+          if (challenges?.isProgress !== 'RUN') {
             return (
               <Link
                 className="w-full line-clamp-1 h-5 break-words hover:shadow-md hover:font-bold"
