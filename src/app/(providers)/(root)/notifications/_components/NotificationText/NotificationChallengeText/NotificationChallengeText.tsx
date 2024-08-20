@@ -12,16 +12,17 @@ const NotificationChallengeText = ({ category, id }: NotificationChallengeTextPr
 
   if (category === 'pre-start') {
     return (
-      <div>
-        <span className="text-primary-100">{`${challenge.title} 챌린지`}</span>가 내일부터 시작됩니다.
+      <div className="line-clamp-2">
+        <span className="text-primary-100">{`${challenge.title} 챌린지`}</span>가 내일부터 시작됩니다. <br />
+        준비되셨나요?
       </div>
     );
   }
 
   if (category === 'verification') {
     return (
-      <div>
-        오늘 아직 <span className="text-primary-100">{`${challenge.title} 챌린지`}</span> 인증을 하지 않았어요.
+      <div className="line-clamp-2">
+        오늘 아직 <span className="text-primary-100">{`${challenge.title} 챌린지`}</span> 인증을 완료하지 않으셨습니다.
       </div>
     );
   }

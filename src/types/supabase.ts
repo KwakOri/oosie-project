@@ -496,6 +496,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "communityQa_answerId_fkey"
+            columns: ["answerId"]
+            isOneToOne: false
+            referencedRelation: "communityAnswer"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "communityQa_questionId_fkey"
             columns: ["questionId"]
             isOneToOne: false
@@ -777,18 +784,30 @@ export type Database = {
       }
       exercisesBookmarks: {
         Row: {
-          exerciseName: string
+          date: string | null
+          exerciseType: string | null
           id: number
+          memo: string | null
+          name: string
+          record: Json | null
           userId: string | null
         }
         Insert: {
-          exerciseName: string
+          date?: string | null
+          exerciseType?: string | null
           id?: number
+          memo?: string | null
+          name: string
+          record?: Json | null
           userId?: string | null
         }
         Update: {
-          exerciseName?: string
+          date?: string | null
+          exerciseType?: string | null
           id?: number
+          memo?: string | null
+          name?: string
+          record?: Json | null
           userId?: string | null
         }
         Relationships: [
@@ -866,6 +885,21 @@ export type Database = {
           },
         ]
       }
+      level: {
+        Row: {
+          experience: number
+          level: number
+        }
+        Insert: {
+          experience: number
+          level?: number
+        }
+        Update: {
+          experience?: number
+          level?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           category: string
@@ -941,9 +975,11 @@ export type Database = {
         Row: {
           createdAt: string
           email: string
+          experience: number | null
           height: number | null
           id: string
           introduction: string
+          level: number | null
           nickname: string | null
           profileURL: string | null
           userIndex: number
@@ -952,9 +988,11 @@ export type Database = {
         Insert: {
           createdAt?: string
           email: string
+          experience?: number | null
           height?: number | null
           id: string
           introduction?: string
+          level?: number | null
           nickname?: string | null
           profileURL?: string | null
           userIndex?: number
@@ -963,9 +1001,11 @@ export type Database = {
         Update: {
           createdAt?: string
           email?: string
+          experience?: number | null
           height?: number | null
           id?: string
           introduction?: string
+          level?: number | null
           nickname?: string | null
           profileURL?: string | null
           userIndex?: number
@@ -978,6 +1018,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_level_fkey"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "level"
+            referencedColumns: ["level"]
           },
         ]
       }
