@@ -13,7 +13,6 @@ import {
   useGetCommunityPostDetail,
 } from '@/hooks/community/useCommunity';
 import { useLevelUp } from '@/hooks/level/useLevel';
-import { AnswerResponse, CommunityPostData } from '@/types/community';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -36,19 +35,15 @@ const FloatingWriteButton = dynamic(() => import('../../../_components/Community
 
 interface CommunityPostDetailProps {
   postId: string;
-  initialData: {
-    post: CommunityPostData;
-    answers: AnswerResponse;
-  };
 }
 
-const CommunityPostDetail = ({ postId, initialData }: CommunityPostDetailProps) => {
-  const { data: post, isLoading } = useGetCommunityPostDetail(postId, initialData.post);
+const CommunityPostDetail = ({ postId }: CommunityPostDetailProps) => {
+  const { data: post, isLoading } = useGetCommunityPostDetail(postId);
   const { data: user } = useGetUser();
-  const { data: answers, isLoading: isAnswersLoading } = useGetAnswers(postId, initialData.answers);
+  const { data: answers, isLoading: isAnswersLoading } = useGetAnswers(postId);
   const { data: isAcceptedAnswer, isLoading: isAcceptedAnswerLoading } = useGetAcceptedAnswer(postId);
 
-  const { mutate: deletePost } = useDeleteCommunityPost(post.category);
+  const { mutate: deletePost } = useDeleteCommunityPost(post?.category || '');
   const { mutateAsync: deleteAnswer } = useDeleteAnswer();
 
   const { mutate: acceptAnswer } = useAcceptAnswer();
@@ -68,7 +63,13 @@ const CommunityPostDetail = ({ postId, initialData }: CommunityPostDetailProps) 
 
   const isAuthor = post.user.id === user?.id;
 
-  const handleEdit = () => router.push(`/community/${postId}/edit`);
+  const handleEdit = () => {
+    if (!isAcceptedAnswer) {
+      router.push(`/community/${postId}/edit`);
+    } else {
+      modal.alert(['채택된 답변은 수정할 수 없습니다.']);
+    }
+  };
   const handleDelete = () => {
     modal.confirm(['정말로 이 게시글을 삭제하시겠습니까?']).then((yes) => {
       if (yes) {
@@ -140,7 +141,7 @@ const CommunityPostDetail = ({ postId, initialData }: CommunityPostDetailProps) 
             answers={answers?.answers}
             userId={user?.id || ''}
             postId={postId}
-            acceptedAnswer={answers?.acceptedAnswer}
+            acceptedAnswer={answers?.acceptedAnswer || null}
             isAuthor={isAuthor}
             onAcceptAnswer={handleAcceptAnswer}
             isAcceptedAnswerLoading={isAcceptedAnswerLoading}

@@ -1,6 +1,7 @@
 'use client';
 
 import { fetchDataByInfinityQuery } from '@/app/(providers)/(root)/challenges/[id]/verification/_hooks/useVerification';
+import { useModal } from '@/contexts/modal.context/modal.context';
 import { useWindowWidthStore } from '@/stores/windowWidth.store';
 import { createClient } from '@/supabase/client';
 import { verificationsCountType, verificationsType } from '@/types/challenge';
@@ -17,6 +18,10 @@ const VerificationList = ({ counts, title }: { counts: verificationsCountType; t
   const width = useWindowWidthStore((state) => state.width);
   const obsRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  const modal = useModal();
+  const openVerificationModal = (data: any) => {
+    modal.custom.verification(data);
+  };
 
   const {
     data: verifications,
@@ -64,7 +69,7 @@ const VerificationList = ({ counts, title }: { counts: verificationsCountType; t
   };
 
   return (
-    <div className="px-4">
+    <div className=" mb-4">
       {!verifications ||
         (!verifications.length && (
           <div>
@@ -72,13 +77,19 @@ const VerificationList = ({ counts, title }: { counts: verificationsCountType; t
           </div>
         ))}
       {verifications && verifications.length > 0 && (
-        <div className="flex flex-col gap-4 px-4">
+        <div className="flex flex-col gap-4 ">
           <LocalBanner users={counts.totalUsers} title={title} />
 
           <ul>
             <Masonry breakpointCols={breakPoint} className="my-masonry-grid" columnClassName="my-masonry-grid_column">
               {verifications?.map((verification, i) => (
-                <li className="list-none" key={verification.id}>
+                <li
+                  className="list-none"
+                  key={verification.id}
+                  onClick={() => {
+                    openVerificationModal(verification);
+                  }}
+                >
                   <VerificationItem verification={verification} />
                 </li>
               ))}
